@@ -1,0 +1,31 @@
+model:
+  name: Mamba-MoE
+  backbone_dim: 48
+  input_channels: 1
+  output_channels: 1
+  mambair_blocks: [2, 2, 4, 2, 2]
+  shared_output_head: true
+
+hmoe:
+  routing: deterministic_known_modality
+  injected_conv2d_min_channels: 32
+  ranks:
+    MRI: 128
+    CT: 64
+    PET: 32
+  expert_type:
+    MRI_stride1: spatial
+    MRI_strided: channel
+    CT: channel
+    PET: channel
+
+training:
+  base_iterations: 120000
+  refinement_iterations: 4000
+  optimizer: AdamW
+  max_lr: 0.0002
+  min_lr: 0.0000001
+  patch_size: 128
+  batch_size: 12
+  gradient_accumulation: 2
+
