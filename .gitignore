@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.Python
+.venv/
+venv/
+env/
+
+# Build and packaging
+build/
+dist/
+*.egg-info/
+
+# Experiments and logs
+outputs/
+output/
+results/
+runs/
+logs/
+wandb/
+tensorboard/
+*.log
+
+# Model checkpoints and generated predictions
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+checkpoints/
+pretrained/
+predictions/
+
+# Data
+data/
+datasets/
+
+# Editors and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
