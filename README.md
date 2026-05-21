@@ -2,13 +2,17 @@
 
 Official implementation of **Mamba-MoE: Deterministic Expert Isolation With a Shared Output Head for All-in-One Medical Image Restoration**.
 
+<p align="center">
+  <img src="assets/fig1.png" width="95%">
+</p>
+
+<p align="center">
+  <em>Deterministic intermediate expert isolation with a shared output head for all-in-one medical image restoration.</em>
+</p>
+
 Mamba-MoE is an all-in-one medical image restoration framework for MRI super-resolution, CT denoising, and PET restoration/synthesis. It builds on an AMIR-style instruction-guided Mamba encoder-decoder and injects deterministic modality-matched residual experts into intermediate convolutional operators. MRI uses a spatial expert for stride-1 wrapped convolutions, whereas CT and PET use compact channel experts. The final reconstruction layer is shared across modalities.
 
 > **Release status.** This repository currently provides a lightweight core implementation for paper review and reproducibility inspection. Full training scripts, pretrained checkpoints, saved-prediction evaluation scripts, and case-level statistical analysis scripts will be released with the full version.
-
-## Overview
-
-![Mamba-MoE framework](assets/fig1.png)
 
 ## Key Features
 
@@ -26,8 +30,12 @@ Mamba-MoE/
   README.md
   LICENSE
   requirements.txt
+  environment.yml
   assets/
     fig1.png
+    fig2.png
+  docs/
+    reproducibility.md
   configs/
     mamba_moe_sharedhead.yaml
   dataset/
@@ -35,8 +43,11 @@ Mamba-MoE/
   mamba_moe/
     __init__.py
     model.py
+    vmamba.py
   scripts/
+    evaluate.py
     run_minimal_inference.py
+    train.py
 ```
 
 ## Installation
@@ -77,6 +88,14 @@ python scripts/run_minimal_inference.py --task MRI --height 128 --width 128
 This work uses the public All-in-One medical image restoration benchmark released with AMIR. Please see [`dataset/README.md`](dataset/README.md) for dataset links and the expected local directory layout.
 
 No dataset files are redistributed in this repository.
+
+## Qualitative Results
+
+<p align="center">
+  <img src="assets/fig2.png" width="95%">
+</p>
+
+Representative MRI, CT, and PET restoration examples are shown under the same saved-prediction protocol used in the manuscript. Quantitative interpretation should rely on the full test-set and case-level summaries reported in the paper.
 
 ## Training
 
@@ -120,4 +139,3 @@ If this repository is useful for your research, please cite:
 ## License
 
 This project is released under the MIT License. See [`LICENSE`](LICENSE) for details.
-
