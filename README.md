@@ -12,7 +12,7 @@ Official implementation of **Mamba-MoE: Deterministic Expert Isolation With a Sh
 
 Mamba-MoE is an all-in-one medical image restoration framework for MRI super-resolution, CT denoising, and PET restoration/synthesis. It builds on an AMIR-style instruction-guided Mamba encoder-decoder and injects deterministic modality-matched residual experts into intermediate convolutional operators. MRI uses a spatial expert for stride-1 wrapped convolutions, whereas CT and PET use compact channel experts. The final reconstruction layer is shared across modalities.
 
-> **Release status.** This repository currently provides a lightweight core implementation for paper review and reproducibility inspection. Full training scripts, pretrained checkpoints, saved-prediction evaluation scripts, and case-level statistical analysis scripts will be released with the full version.
+> **Release status.** This repository provides the core model, lightweight training/evaluation utilities, and prediction export scripts. Full benchmark-specific dataloaders, pretrained checkpoints, full saved predictions, and case-level statistical analysis scripts will be released upon publication.
 
 ## Key Features
 
@@ -35,6 +35,7 @@ Mamba-MoE/
     fig1.png
     fig2.png
   docs/
+    metrics.md
     reproducibility.md
   configs/
     mamba_moe_sharedhead.yaml
@@ -46,6 +47,7 @@ Mamba-MoE/
     vmamba.py
   scripts/
     evaluate.py
+    export_predictions.py
     run_minimal_inference.py
     train.py
 ```
@@ -58,7 +60,7 @@ conda activate mamba_moe
 pip install -r requirements.txt
 ```
 
-The model expects a VMamba/VSSBlock implementation. In the full release, `mamba_moe/vmamba.py` will be populated by the project-compatible VSSBlock implementation. For now, `mamba_moe/model.py` keeps the same import path used in our experiments so the architecture remains aligned with the manuscript.
+The model uses the project-compatible VSSBlock implementation provided in `mamba_moe/vmamba.py`. The import path in `mamba_moe/model.py` matches the implementation used in our experiments so the architecture remains aligned with the manuscript.
 
 ## Minimal Usage
 
@@ -99,7 +101,7 @@ Representative MRI, CT, and PET restoration examples are shown under the same sa
 
 ## Training
 
-The full training pipeline will be released after publication. The manuscript uses:
+The repository includes a minimal training skeleton in `scripts/train.py`. This script is intended to verify the optimization path and model wiring; it uses a placeholder dataset and is not the full All-in-One benchmark dataloader. The manuscript uses:
 
 - 120,000-step base training;
 - 4,000-step shared-head refinement;
@@ -110,13 +112,13 @@ The key model configuration is summarized in [`configs/mamba_moe_sharedhead.yaml
 
 ## Evaluation
 
-The full release will include scripts for:
+The repository includes lightweight utilities for saved-prediction evaluation and prediction export:
 
 - strict saved-prediction evaluation;
 - PSNR, SSIM, and HFEN computation after denormalization and modality-specific truncation;
-- MRI/CT edge Dice;
-- PET lesion Dice and SUV bias;
-- case-level paired significance testing.
+- prediction export with a fixed modality context.
+
+Metric definitions are summarized in [`docs/metrics.md`](docs/metrics.md). Full benchmark-specific evaluation wrappers, MRI/CT edge Dice, PET lesion Dice and SUV bias, and case-level paired significance testing scripts will be released upon publication.
 
 ## Checkpoints
 
@@ -129,7 +131,7 @@ If this repository is useful for your research, please cite:
 ```bibtex
 @article{mambamoe2026,
   title={Mamba-MoE: Deterministic Expert Isolation With a Shared Output Head for All-in-One Medical Image Restoration},
-  author={Anonymous},
+  author={Liu, Yang and Man, Ranran and Peng, Yanjun and Sun, Jindong and Yang, Guang},
   journal={IEEE Transactions on Medical Imaging},
   year={2026},
   note={Under review}
