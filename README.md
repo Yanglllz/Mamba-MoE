@@ -12,7 +12,7 @@ Official implementation of **Mamba-MoE: Deterministic Expert Isolation With a Sh
 
 Mamba-MoE is an all-in-one medical image restoration framework for MRI super-resolution, CT denoising, and PET restoration/synthesis. It builds on an AMIR-style instruction-guided Mamba encoder-decoder and injects deterministic modality-matched residual experts into intermediate convolutional operators. MRI uses a spatial expert for stride-1 wrapped convolutions, whereas CT and PET use compact channel experts. The final reconstruction layer is shared across modalities.
 
-> **Release status.** This repository provides the core model, lightweight training/evaluation utilities, and prediction export scripts. Full benchmark-specific dataloaders, pretrained checkpoints, full saved predictions, and case-level statistical analysis scripts will be released upon publication.
+> **Release status.** This repository provides the core model, a project-compatible VSSBlock implementation, a paired-file restoration dataloader, lightweight training/evaluation utilities, and prediction export scripts. Full benchmark-specific dataloaders, pretrained checkpoints, full saved predictions, and case-level statistical analysis scripts will be released upon publication.
 
 ## Key Features
 
@@ -21,7 +21,7 @@ Mamba-MoE is an all-in-one medical image restoration framework for MRI super-res
 - **Heterogeneous experts:** MRI uses spatial residual experts, while CT and PET use channel-oriented residual experts.
 - **Intermediate injection:** H-MoE wraps selected intermediate `Conv2d` operators and computes `z = C(u) + E_m(u)`.
 - **Shared output head:** one shared `3x3` reconstruction layer is used for all modalities with a global input residual.
-- **Lightweight release:** the current code isolates the core architecture without large checkpoints or dataset files.
+- **Paired-file dataloader:** a lightweight loader supports local paired `input`/`gt` restoration files for MRI, CT, and PET.
 
 ## Repository Structure
 
@@ -43,6 +43,7 @@ Mamba-MoE/
     README.md
   mamba_moe/
     __init__.py
+    data.py
     model.py
     vmamba.py
   scripts/
@@ -87,7 +88,26 @@ python scripts/run_minimal_inference.py --task MRI --height 128 --width 128
 
 ## Dataset Preparation
 
-This work uses the public All-in-One medical image restoration benchmark released with AMIR. Please see [`dataset/README.md`](dataset/README.md) for dataset links and the expected local directory layout.
+This work uses the public All-in-One medical image restoration benchmark released with AMIR. Please see [`dataset/README.md`](dataset/README.md) for dataset links, access notes, and local directory examples.
+
+For lightweight local experiments, the included `PairedRestorationDataset` expects paired degraded/reference files under this layout:
+
+```text
+data/
+  MRI/
+    input/
+      case001.npy
+    gt/
+      case001.npy
+  CT/
+    input/
+    gt/
+  PET/
+    input/
+    gt/
+```
+
+Supported paired-file formats are `.npy`, `.npz`, `.png`, `.tif`, and `.tiff`. Files are paired by filename stem. If a split is provided, the loader also supports `data/<modality>/<split>/input` and `data/<modality>/<split>/gt`.
 
 No dataset files are redistributed in this repository.
 
@@ -101,7 +121,27 @@ Representative MRI, CT, and PET restoration examples are shown under the same sa
 
 ## Training
 
-The repository includes a minimal training skeleton in `scripts/train.py`. This script is intended to verify the optimization path and model wiring; it uses a placeholder dataset and is not the full All-in-One benchmark dataloader. The manuscript uses:
+The repository includes a lightweight training skeleton in `scripts/train.py`. It can run either on a placeholder random dataset for wiring checks or on paired local restoration files through `--data_root`.
+
+Placeholder wiring check:
+
+```bash
+python scripts/train.py --steps 10 --batch_size 1
+```
+
+Paired-file training example:
+
+```bash
+python scripts/train.py \
+  --data_root /path/to/data \
+  --split train \
+  --batch_size 1 \
+  --steps 100
+```
+
+`DeterministicHMoE` uses one modality context per forward pass, so mixed-modality batches require a modality-grouped sampler. For simple local experiments, use `--batch_size 1`.
+
+The manuscript uses:
 
 - 120,000-step base training;
 - 4,000-step shared-head refinement;

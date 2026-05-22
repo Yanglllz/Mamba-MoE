@@ -2,17 +2,17 @@ import argparse
 from pathlib import Path
 
 import torch
-import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset
 
-from mamba_moe import DeterministicHMoE, build_mamba_moe_sharedhead
+from mamba_moe import DeterministicHMoE, PairedRestorationDataset, build_mamba_moe_sharedhead
 
 
 class PlaceholderRestorationDataset(Dataset):
-    """Minimal placeholder dataset.
+    """Minimal placeholder dataset for wiring checks.
 
-    Replace this class with the All-in-One benchmark loader in the full release.
-    The expected item is (degraded_image, reference_image, modality_name).
+    The real paired-file loader is ``PairedRestorationDataset`` and can be
+    enabled with ``--data_root``. The expected item is
+    (degraded_image, reference_image, modality_name).
     """
 
     def __init__(self, length: int = 16, image_size: int = 128) -> None:
@@ -34,10 +34,28 @@ def charbonnier_loss(pred: torch.Tensor, target: torch.Tensor, eps: float = 1e-3
     return torch.mean(torch.sqrt((pred - target) ** 2 + eps**2))
 
 
+def _resolve_batch_task(modalities) -> str:
+    if isinstance(modalities, str):
+        return modalities
+    if isinstance(modalities, (list, tuple)):
+        task = str(modalities[0])
+        if any(str(item) != task for item in modalities):
+            raise ValueError(
+                "Mixed-modality batch detected. DeterministicHMoE uses one modality "
+                "context per forward pass; use --batch_size 1 or a modality-grouped sampler."
+            )
+        return task
+    return str(modalities)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Minimal Mamba-MoE training skeleton.")
+    parser.add_argument("--data_root", type=Path, default=None, help="Optional paired restoration dataset root.")
+    parser.add_argument("--split", type=str, default=None, help="Optional split name, e.g. train or val.")
+    parser.add_argument("--modalities", nargs="+", default=["MRI", "CT", "PET"])
     parser.add_argument("--steps", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=1)
+    parser.add_argument("--image_size", type=int, default=128, help="Placeholder dataset image size.")
     parser.add_argument("--lr", type=float, default=2e-4)
     parser.add_argument("--checkpoint_dir", type=Path, default=Path("checkpoints"))
     args = parser.parse_args()
@@ -46,7 +64,13 @@ def main() -> None:
     model = build_mamba_moe_sharedhead(device=device)
     optimizer = torch.optim.AdamW((p for p in model.parameters() if p.requires_grad), lr=args.lr)
 
-    dataset = PlaceholderRestorationDataset()
+    if args.data_root is None:
+        dataset = PlaceholderRestorationDataset(image_size=args.image_size)
+        print("Using placeholder random dataset. Pass --data_root to use paired restoration files.")
+    else:
+        dataset = PairedRestorationDataset(args.data_root, modalities=args.modalities, split=args.split)
+        print(f"Loaded {len(dataset)} paired samples from {args.data_root}.")
+
     loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
     args.checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
@@ -54,8 +78,8 @@ def main() -> None:
     step = 0
     while step < args.steps:
         for x, y, modalities in loader:
-            task = modalities[0] if isinstance(modalities, (list, tuple)) else modalities
-            DeterministicHMoE.CURRENT_TASK = str(task)
+            task = _resolve_batch_task(modalities)
+            DeterministicHMoE.CURRENT_TASK = task
             x = x.to(device)
             y = y.to(device)
 
@@ -66,7 +90,7 @@ def main() -> None:
             optimizer.step()
 
             step += 1
-            print({"step": step, "task": DeterministicHMoE.CURRENT_TASK, "loss": float(loss.item())})
+            print({"step": step, "task": task, "loss": float(loss.item())})
             if step >= args.steps:
                 break
 
@@ -75,4 +99,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
