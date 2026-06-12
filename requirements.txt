@@ -3,4 +3,6 @@ numpy
 tqdm
 scikit-image
 scipy
-
+einops
+mamba-ssm
+causal-conv1d

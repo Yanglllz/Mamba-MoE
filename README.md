@@ -1,16 +1,16 @@
 # Mamba-MoE
 
-Official implementation of **Mamba-MoE: Deterministic Expert Isolation With a Shared Output Head for All-in-One Medical Image Restoration**.
+Official implementation of **Mamba-MoE: Deterministic Intermediate Expert Isolation With a Shared Reconstruction Head for All-in-One Medical Image Restoration**.
 
 <p align="center">
   <img src="assets/fig1.png" width="95%">
 </p>
 
 <p align="center">
-  <em>Deterministic intermediate expert isolation with a shared output head for all-in-one medical image restoration.</em>
+  <em>Deterministic intermediate expert isolation with a shared reconstruction head for all-in-one medical image restoration.</em>
 </p>
 
-Mamba-MoE is an all-in-one medical image restoration framework for MRI super-resolution, CT denoising, and PET restoration/synthesis. It builds on an AMIR-style instruction-guided Mamba encoder-decoder and injects deterministic modality-matched residual experts into intermediate convolutional operators. MRI uses a spatial expert for stride-1 wrapped convolutions, whereas CT and PET use compact channel experts. The final reconstruction layer is shared across modalities.
+Mamba-MoE is an all-in-one medical image restoration framework for MRI super-resolution, CT denoising, and PET restoration. It builds on an AMIR-style instruction-guided Mamba encoder-decoder and injects deterministic modality-matched residual experts into intermediate convolutional operators. MRI uses a spatial expert for stride-1 wrapped convolutions, whereas CT and PET use compact channel experts. The final reconstruction layer is shared across modalities.
 
 > **Release status.** This repository provides the core model, a project-compatible VSSBlock implementation, a paired-file restoration dataloader, lightweight training/evaluation utilities, and prediction export scripts. Full benchmark-specific dataloaders, pretrained checkpoints, full saved predictions, and case-level statistical analysis scripts will be released upon publication.
 
@@ -20,7 +20,7 @@ Mamba-MoE is an all-in-one medical image restoration framework for MRI super-res
 - **Deterministic expert isolation:** the known modality identity activates one matched expert branch without learned soft expert mixing.
 - **Heterogeneous experts:** MRI uses spatial residual experts, while CT and PET use channel-oriented residual experts.
 - **Intermediate injection:** H-MoE wraps selected intermediate `Conv2d` operators and computes `z = C(u) + E_m(u)`.
-- **Shared output head:** one shared `3x3` reconstruction layer is used for all modalities with a global input residual.
+- **Shared reconstruction head:** one shared `3x3` reconstruction layer is used for all modalities with a global input residual.
 - **Paired-file dataloader:** a lightweight loader supports local paired `input`/`gt` restoration files for MRI, CT, and PET.
 
 ## Repository Structure
@@ -36,6 +36,7 @@ Mamba-MoE/
     fig2.png
   docs/
     metrics.md
+    release_manifest.md
     reproducibility.md
   configs/
     mamba_moe_sharedhead.yaml
@@ -141,12 +142,13 @@ python scripts/train.py \
 
 `DeterministicHMoE` uses one modality context per forward pass, so mixed-modality batches require a modality-grouped sampler. For simple local experiments, use `--batch_size 1`.
 
-The manuscript uses:
+The manuscript reports the main model from:
 
-- 120,000-step base training;
-- 4,000-step shared-head refinement;
+- one 120,000-iteration checkpoint;
 - balanced MRI/CT/PET modality exposure;
 - deterministic modality context during inference.
+
+No additional 4,000-step or low-learning-rate refinement checkpoint is used for the reported main results.
 
 The key model configuration is summarized in [`configs/mamba_moe_sharedhead.yaml`](configs/mamba_moe_sharedhead.yaml).
 
@@ -155,10 +157,10 @@ The key model configuration is summarized in [`configs/mamba_moe_sharedhead.yaml
 The repository includes lightweight utilities for saved-prediction evaluation and prediction export:
 
 - strict saved-prediction evaluation;
-- PSNR, SSIM, and HFEN computation after denormalization and modality-specific truncation;
+- PSNR and SSIM computation after denormalization and modality-specific truncation;
 - prediction export with a fixed modality context.
 
-Metric definitions are summarized in [`docs/metrics.md`](docs/metrics.md). Full benchmark-specific evaluation wrappers, MRI/CT edge Dice, PET lesion Dice and SUV bias, and case-level paired significance testing scripts will be released upon publication.
+Metric definitions are summarized in [`docs/metrics.md`](docs/metrics.md). Full benchmark-specific evaluation wrappers, PET lesion Dice and SUV bias, CT sanity metrics, diagnostic high-frequency summaries, and case-level paired significance testing scripts will be released upon publication.
 
 ## Checkpoints
 
@@ -170,9 +172,9 @@ If this repository is useful for your research, please cite:
 
 ```bibtex
 @article{mambamoe2026,
-  title={Mamba-MoE: Deterministic Expert Isolation With a Shared Output Head for All-in-One Medical Image Restoration},
+  title={Mamba-MoE: Deterministic Intermediate Expert Isolation With a Shared Reconstruction Head for All-in-One Medical Image Restoration},
   author={Liu, Yang and Man, Ranran and Peng, Yanjun and Sun, Jindong and Yang, Guang},
-  journal={IEEE Transactions on Medical Imaging},
+  journal={Machine Intelligence Research},
   year={2026},
   note={Under review}
 }

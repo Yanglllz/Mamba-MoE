@@ -22,25 +22,13 @@ Structural similarity (SSIM) measures local luminance, contrast, and structural 
 
 SSIM is computed under the same denormalization and truncation protocol as PSNR, using the postprocessed physical intensity range as the data range.
 
-### LoG-HFEN
-
-High-frequency error norm (HFEN) is used to assess high-frequency structural fidelity. In the main restoration table, HFEN is computed by applying Gaussian smoothing followed by a Laplacian high-pass operator, with `sigma = 1.5`, and then measuring RMSE between filtered prediction and filtered reference images. Lower HFEN is better.
-
-HFEN values are modality-scale dependent after denormalization and should be compared within each modality.
-
 ### Diagnostic HF-RMSE
 
 Diagnostic high-frequency RMSE is used only for controlled ablation and case-level diagnostic analysis. It applies a Laplace high-pass filter to prediction and reference images and measures RMSE between the filtered images. Lower diagnostic HF-RMSE is better.
 
-Diagnostic HF-RMSE is separate from the LoG-HFEN reported in the main restoration table and should not be numerically compared with LoG-HFEN.
+Diagnostic HF-RMSE is not part of the main cross-model restoration table and should be interpreted only within the diagnostic protocol where it is reported.
 
 ## Downstream Proxy Metrics
-
-### Edge Dice
-
-Edge Dice is reported for MRI and CT as a structural proxy. It is computed on Canny edge maps extracted from prediction and reference images under fixed Canny parameters. Higher edge Dice is better.
-
-Edge Dice is a proxy for structural boundary agreement and does not replace reader studies or task-specific clinical validation.
 
 ### PET Lesion Dice
 
@@ -71,4 +59,3 @@ Under the benchmark grouping used in the manuscript:
 - PET: 29 independent cases
 
 CT case-level significance is omitted because only one independent CT case is available.
-

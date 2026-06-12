@@ -4,7 +4,7 @@ model:
   input_channels: 1
   output_channels: 1
   mambair_blocks: [2, 2, 4, 2, 2]
-  shared_output_head: true
+  shared_reconstruction_head: true
 
 hmoe:
   routing: deterministic_known_modality
@@ -21,11 +21,11 @@ hmoe:
 
 training:
   base_iterations: 120000
-  refinement_iterations: 4000
+  reported_main_checkpoint: 120000_iteration_checkpoint
+  refinement_iterations_used_for_main_results: 0
   optimizer: AdamW
   max_lr: 0.0002
   min_lr: 0.0000001
   patch_size: 128
   batch_size: 12
   gradient_accumulation: 2
-

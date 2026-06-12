@@ -16,4 +16,5 @@ dependencies:
   - torchvision
   - pip:
       - einops
-
+      - mamba-ssm
+      - causal-conv1d

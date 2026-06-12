@@ -32,7 +32,7 @@ CT case-level significance is omitted because the available test grouping contai
   - MRI: 128
   - CT: 64
   - PET: 32
-- Output head: one shared `3x3` reconstruction layer
+- Reconstruction head: one shared `3x3` reconstruction layer
 
 ## Training Protocol
 
@@ -51,13 +51,7 @@ The reported model uses:
 - Balanced MRI/CT/PET modality exposure
 - Random seed: 42
 
-The final checkpoint is further refined with:
-
-- 4,000-step shared-head refinement
-- Learning rate schedule: `5e-6 -> 5e-7`
-- EMA decay: 0.999
-- No-rotation late-stage augmentation
-- Updates restricted to expert branches and the shared output head
+No additional 4,000-step or low-learning-rate refinement checkpoint is used for the reported main results. All main-table values correspond to the single consistently trained 120,000-iteration checkpoint.
 
 ## Evaluation Protocol
 
@@ -68,22 +62,20 @@ All methods are evaluated under a strict saved-prediction protocol:
 3. Truncate predictions to the modality-specific physical intensity range.
 4. Compute restoration metrics from saved predictions.
 
-Primary metrics:
+Primary main-table metrics:
 
 - PSNR
 - SSIM
-- LoG-HFEN with `sigma = 1.5`
 
-Downstream proxy metrics:
+Secondary diagnostic and proxy metrics:
 
-- MRI/CT edge Dice
 - PET lesion Dice
 - PET SUVmax bias
 - PET SUVmean bias
+- diagnostic high-frequency summaries for routing/module diagnostics and CT sanity evaluation
 
 Slice-level confidence intervals use 5,000 bootstrap resamples with the percentile method. Statistical tests use case-level aggregation and paired Wilcoxon signed-rank tests when multiple independent cases are available.
 
 ## Hardware and Software
 
 The manuscript reports inference cost on an NVIDIA GeForce RTX 5090 GPU using PyTorch 2.7.0 and CUDA 12.8. The lightweight release does not require the exact same GPU for model inspection or minimal inference.
-
