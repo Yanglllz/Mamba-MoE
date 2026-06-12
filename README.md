@@ -12,8 +12,7 @@ Official implementation of **Mamba-MoE: Deterministic Intermediate Expert Isolat
 
 Mamba-MoE is an all-in-one medical image restoration framework for MRI super-resolution, CT denoising, and PET restoration. It builds on an AMIR-style instruction-guided Mamba encoder-decoder and injects deterministic modality-matched residual experts into intermediate convolutional operators. MRI uses a spatial expert for stride-1 wrapped convolutions, whereas CT and PET use compact channel experts. The final reconstruction layer is shared across modalities.
 
-> **Release status.** This repository provides the core model, a project-compatible VSSBlock implementation, a paired-file restoration dataloader, lightweight training/evaluation utilities, and prediction export scripts. Full benchmark-specific dataloaders, pretrained checkpoints, full saved predictions, and case-level statistical analysis scripts will be released upon publication.
-> This lightweight release mirrors the shared-reconstruction-head design used in the manuscript, but it is not yet the complete 120k benchmark reproduction package. Checkpoint-compatible construction details, checkpoint hashes, benchmark-specific evaluators, and full statistical artifacts will be released with the full artifact package.
+> **Release status.** This repository provides the core shared-head Mamba-MoE model, the main 120,000-step training entry point, strict checkpoint evaluation code, paired-file dataloaders, and prediction export utilities. Large medical datasets, pretrained checkpoints, saved predictions, and case-level statistical artifacts are not stored in Git and will be distributed separately when the manuscript artifact package is finalized.
 
 ## Key Features
 
@@ -48,6 +47,12 @@ Mamba-MoE/
     data.py
     model.py
     vmamba.py
+  paper_code/
+    README.md
+    train_main_120k.py
+    evaluate_strict.py
+    model/
+      FreqMamba_MoE_SharedHead.py
   scripts/
     evaluate.py
     export_predictions.py
@@ -125,9 +130,19 @@ Representative MRI, CT, and PET restoration examples are shown under the same sa
 
 ## Training
 
-The repository includes a lightweight training skeleton in `scripts/train.py`. It can run either on a placeholder random dataset for wiring checks or on paired local restoration files through `--data_root`.
+The manuscript-facing training entry point is `paper_code/train_main_120k.py`. It trains the shared-reconstruction-head Mamba-MoE graph with deterministic MRI/CT/PET modality routing on local paired restoration data.
 
-This script is intended for wiring checks and local adaptation experiments. It is not the full 120,000-iteration benchmark training launcher used for the manuscript.
+Main training example:
+
+```bash
+python paper_code/train_main_120k.py \
+  --data_root /path/to/data \
+  --output_dir runs/mamba_moe_120k \
+  --steps 120000 \
+  --batch_size 1
+```
+
+For quick installation or wiring checks, `scripts/train.py` remains available and can run either on a placeholder random dataset or on paired local restoration files.
 
 Placeholder wiring check:
 
@@ -159,13 +174,22 @@ The key model configuration is summarized in [`configs/mamba_moe_sharedhead.yaml
 
 ## Evaluation
 
-The repository includes lightweight utilities for saved-prediction evaluation and prediction export:
+The manuscript-facing checkpoint evaluator is `paper_code/evaluate_strict.py`:
+
+```bash
+python paper_code/evaluate_strict.py \
+  --checkpoint /path/to/checkpoint.pth \
+  --data_root /path/to/data \
+  --save_dir evaluation/final_120k
+```
+
+The repository also includes utilities for saved-prediction evaluation and prediction export:
 
 - strict saved-prediction evaluation;
 - PSNR and SSIM computation after denormalization and modality-specific truncation;
 - prediction export with a fixed modality context.
 
-The included `scripts/evaluate.py` summarizes PSNR and SSIM only; it does not generate manuscript confidence intervals, PET proxy metrics, CT sanity results, routing diagnostics, or module diagnostics. Metric definitions are summarized in [`docs/metrics.md`](docs/metrics.md). Full benchmark-specific evaluation wrappers, PET lesion Dice and SUV bias, CT sanity metrics, diagnostic high-frequency summaries, and case-level paired significance testing scripts will be released upon publication.
+The strict public evaluator summarizes PSNR and SSIM and exports per-slice and summary CSV files. It does not include large saved-prediction directories, PET proxy metric artifacts, CT sanity result artifacts, routing diagnostic artifacts, or module diagnostic artifacts. Metric definitions are summarized in [`docs/metrics.md`](docs/metrics.md).
 
 ## Checkpoints
 

@@ -1,6 +1,6 @@
 # Release Manifest
 
-This manifest records the scope of the public lightweight release and its
+This manifest records the scope of the public code release and its
 alignment with the manuscript.
 
 ## Manuscript-Aligned Model Facts
@@ -20,16 +20,19 @@ alignment with the manuscript.
 - Core model definition for a shared-reconstruction-head Mamba-MoE variant.
 - Project-compatible VSSBlock adapter used by the released model code.
 - Deterministic H-MoE wrapper with modality-selected residual experts.
+- Manuscript-facing model entry point under `paper_code/model/`.
+- Main 120,000-step training launcher under `paper_code/train_main_120k.py`.
+- Strict checkpoint evaluator under `paper_code/evaluate_strict.py`.
 - Lightweight paired-file dataset loader for local restoration experiments.
-- Minimal training, evaluation, inference, and prediction-export utilities.
+- Quick-start training, evaluation, inference, and prediction-export utilities.
 - Metric definitions and reproducibility notes.
 
-## Not Included in This Lightweight Release
+## Not Included in Git
 
 - Medical image datasets.
 - Pretrained checkpoints.
-- Full benchmark-specific dataloaders and saved-prediction directories.
-- Full case-level statistical analysis artifacts.
+- Saved-prediction directories.
+- Case-level statistical analysis artifacts.
 - Raw training logs.
 
 These artifacts are large, access-restricted, or benchmark-specific. They are

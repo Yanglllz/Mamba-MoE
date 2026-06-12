@@ -78,4 +78,4 @@ Slice-level confidence intervals use 5,000 bootstrap resamples with the percenti
 
 ## Hardware and Software
 
-The manuscript reports inference cost on an NVIDIA GeForce RTX 5090 GPU using PyTorch 2.7.0 and CUDA 12.8. The lightweight release does not require the exact same GPU for model inspection or minimal inference.
+The manuscript reports inference cost on an NVIDIA GeForce RTX 5090 GPU using PyTorch 2.7.0 and CUDA 12.8. The public code release does not require the exact same GPU for model inspection or quick inference checks.
