@@ -14,6 +14,19 @@ build/
 dist/
 *.egg-info/
 
+# LaTeX and QA artifacts
+*.aux
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.out
+*.synctex.gz
+_qa_pages/
+_figure_scripts/
+_bibtest/
+mirtest.*
+
 # Experiments and logs
 outputs/
 output/
@@ -42,4 +55,3 @@ datasets/
 .idea/
 .DS_Store
 Thumbs.db
-

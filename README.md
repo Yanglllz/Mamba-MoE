@@ -13,6 +13,7 @@ Official implementation of **Mamba-MoE: Deterministic Intermediate Expert Isolat
 Mamba-MoE is an all-in-one medical image restoration framework for MRI super-resolution, CT denoising, and PET restoration. It builds on an AMIR-style instruction-guided Mamba encoder-decoder and injects deterministic modality-matched residual experts into intermediate convolutional operators. MRI uses a spatial expert for stride-1 wrapped convolutions, whereas CT and PET use compact channel experts. The final reconstruction layer is shared across modalities.
 
 > **Release status.** This repository provides the core model, a project-compatible VSSBlock implementation, a paired-file restoration dataloader, lightweight training/evaluation utilities, and prediction export scripts. Full benchmark-specific dataloaders, pretrained checkpoints, full saved predictions, and case-level statistical analysis scripts will be released upon publication.
+> This lightweight release mirrors the shared-reconstruction-head design used in the manuscript, but it is not yet the complete 120k benchmark reproduction package. Checkpoint-compatible construction details, checkpoint hashes, benchmark-specific evaluators, and full statistical artifacts will be released with the full artifact package.
 
 ## Key Features
 
@@ -63,6 +64,8 @@ pip install -r requirements.txt
 ```
 
 The model uses the project-compatible VSSBlock implementation provided in `mamba_moe/vmamba.py`. The import path in `mamba_moe/model.py` matches the implementation used in our experiments so the architecture remains aligned with the manuscript.
+
+`mamba-ssm` and `causal-conv1d` usually require a CUDA/PyTorch build that matches the local GPU environment. CPU-only environments are suitable for source inspection and data-loader checks, but Mamba-backed inference requires these packages to be installed successfully.
 
 ## Minimal Usage
 
@@ -124,6 +127,8 @@ Representative MRI, CT, and PET restoration examples are shown under the same sa
 
 The repository includes a lightweight training skeleton in `scripts/train.py`. It can run either on a placeholder random dataset for wiring checks or on paired local restoration files through `--data_root`.
 
+This script is intended for wiring checks and local adaptation experiments. It is not the full 120,000-iteration benchmark training launcher used for the manuscript.
+
 Placeholder wiring check:
 
 ```bash
@@ -160,7 +165,7 @@ The repository includes lightweight utilities for saved-prediction evaluation an
 - PSNR and SSIM computation after denormalization and modality-specific truncation;
 - prediction export with a fixed modality context.
 
-Metric definitions are summarized in [`docs/metrics.md`](docs/metrics.md). Full benchmark-specific evaluation wrappers, PET lesion Dice and SUV bias, CT sanity metrics, diagnostic high-frequency summaries, and case-level paired significance testing scripts will be released upon publication.
+The included `scripts/evaluate.py` summarizes PSNR and SSIM only; it does not generate manuscript confidence intervals, PET proxy metrics, CT sanity results, routing diagnostics, or module diagnostics. Metric definitions are summarized in [`docs/metrics.md`](docs/metrics.md). Full benchmark-specific evaluation wrappers, PET lesion Dice and SUV bias, CT sanity metrics, diagnostic high-frequency summaries, and case-level paired significance testing scripts will be released upon publication.
 
 ## Checkpoints
 

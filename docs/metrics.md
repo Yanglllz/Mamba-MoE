@@ -2,6 +2,11 @@
 
 This document summarizes the metrics used in the Mamba-MoE manuscript and how they should be interpreted in medical image restoration.
 
+This file provides metric definitions. The lightweight script `scripts/evaluate.py`
+currently implements PSNR and SSIM only. Benchmark-specific PET proxy metrics,
+CT sanity evaluation, routing diagnostics, module diagnostics, and statistical
+testing scripts will be released with the full artifact package.
+
 ## Restoration Metrics
 
 ### PSNR

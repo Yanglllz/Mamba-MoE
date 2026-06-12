@@ -49,3 +49,19 @@ For manuscript provenance, preserve the following outside this code repository:
 
 Do not commit checkpoints, raw medical images, or saved prediction volumes to
 this repository.
+
+## Artifact Release Checklist
+
+| Artifact | Current status | Planned release path |
+| --- | --- | --- |
+| Final 120k checkpoint | not included | external release artifact with SHA-256 |
+| Checkpoint SHA-256 | pending | release manifest update |
+| Final training configuration | summarized only | full artifact package |
+| Table 1 summary CSV | not included | full artifact package |
+| Per-case metric CSV files | not included | full artifact package |
+| Bootstrap CI scripts and outputs | not included | full artifact package |
+| PET lesion Dice / SUV bias evaluator | not included | full artifact package |
+| CT sanity evaluation script | not included | full artifact package |
+| Routing diagnostic scripts | not included | full artifact package |
+| Module diagnostic scripts | not included | full artifact package |
+| Figure-generation scripts | not included | full artifact package |

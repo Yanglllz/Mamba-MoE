@@ -8,7 +8,7 @@ Experiments use the public All-in-One medical image restoration benchmark releas
 
 - MRI super-resolution
 - CT denoising
-- PET restoration/synthesis
+- PET restoration
 
 The strict test evaluation in the manuscript uses:
 

@@ -52,6 +52,7 @@ def main() -> None:
     parser.add_argument("--output_dir", required=True, type=Path)
     parser.add_argument("--task", required=True, choices=["MRI", "CT", "PET"])
     parser.add_argument("--checkpoint", default=None, type=Path)
+    parser.add_argument("--strict", action="store_true", help="Require an exact checkpoint/model key match.")
     parser.add_argument("--suffixes", nargs="+", default=[".npy", ".png", ".tif", ".tiff"])
     args = parser.parse_args()
 
@@ -59,7 +60,8 @@ def main() -> None:
     model = build_mamba_moe_sharedhead(device=device)
     if args.checkpoint is not None:
         checkpoint = torch.load(args.checkpoint, map_location=device)
-        model.load_state_dict(resolve_state_dict(checkpoint), strict=False)
+        missing, unexpected = model.load_state_dict(resolve_state_dict(checkpoint), strict=args.strict)
+        print({"missing_keys": missing, "unexpected_keys": unexpected, "strict": args.strict})
     model.eval()
 
     DeterministicHMoE.CURRENT_TASK = args.task
@@ -79,4 +81,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
