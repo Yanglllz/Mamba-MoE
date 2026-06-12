@@ -8,7 +8,7 @@ Mamba-MoE is evaluated on the public **All-in-One medical image restoration benc
 
 The AMIR benchmark repository provides preprocessing instructions and dataset download links through Baidu Netdisk and Google Drive. Please follow the original benchmark license and access requirements.
 
-## Lightweight Paired-File Layout
+## Local Paired-File Layout
 
 This repository includes `mamba_moe.data.PairedRestorationDataset` for local paired-file experiments. It expects degraded inputs and reference targets under matching filename stems:
 

@@ -1,6 +1,6 @@
 # Reproducibility Notes
 
-This document records the experimental protocol described in the manuscript. The current repository is a lightweight code release; full data loaders, trained checkpoints, saved-prediction evaluation scripts, and case-level statistical analysis scripts will be released with the full version.
+This document records the experimental protocol described in the manuscript. The public repository includes the core model, main training entry point, strict checkpoint evaluator, and local paired-file data loader. Large datasets, trained checkpoints, saved predictions, and case-level statistical artifacts are tracked outside Git.
 
 ## Benchmark
 

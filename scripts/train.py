@@ -8,7 +8,7 @@ from mamba_moe import DeterministicHMoE, PairedRestorationDataset, build_mamba_m
 
 
 class PlaceholderRestorationDataset(Dataset):
-    """Minimal placeholder dataset for wiring checks.
+    """Small synthetic dataset for installation and wiring checks.
 
     The real paired-file loader is ``PairedRestorationDataset`` and can be
     enabled with ``--data_root``. The expected item is
@@ -49,13 +49,13 @@ def _resolve_batch_task(modalities) -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Minimal Mamba-MoE training skeleton.")
+    parser = argparse.ArgumentParser(description="Quick-start Mamba-MoE training utility.")
     parser.add_argument("--data_root", type=Path, default=None, help="Optional paired restoration dataset root.")
     parser.add_argument("--split", type=str, default=None, help="Optional split name, e.g. train or val.")
     parser.add_argument("--modalities", nargs="+", default=["MRI", "CT", "PET"])
     parser.add_argument("--steps", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=1)
-    parser.add_argument("--image_size", type=int, default=128, help="Placeholder dataset image size.")
+    parser.add_argument("--image_size", type=int, default=128, help="Synthetic dataset image size.")
     parser.add_argument("--lr", type=float, default=2e-4)
     parser.add_argument("--checkpoint_dir", type=Path, default=Path("checkpoints"))
     args = parser.parse_args()
@@ -66,7 +66,7 @@ def main() -> None:
 
     if args.data_root is None:
         dataset = PlaceholderRestorationDataset(image_size=args.image_size)
-        print("Using placeholder random dataset. Pass --data_root to use paired restoration files.")
+        print("Using synthetic random data. Pass --data_root to use paired restoration files.")
     else:
         dataset = PairedRestorationDataset(args.data_root, modalities=args.modalities, split=args.split)
         print(f"Loaded {len(dataset)} paired samples from {args.data_root}.")

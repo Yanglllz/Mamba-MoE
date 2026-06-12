@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import random
 from itertools import cycle
 from pathlib import Path
@@ -110,24 +109,31 @@ def train(args: argparse.Namespace) -> None:
     modality_order = list(args.modalities)
     model.train()
 
+    scaler = torch.cuda.amp.GradScaler(enabled=args.amp and device == "cuda")
+
     for step in range(1, args.steps + 1):
         step_loss = 0.0
         optimizer.zero_grad(set_to_none=True)
 
-        for modality in modality_order:
-            x, y, _ = next(loaders[modality])
-            x = x.to(device, non_blocking=True).float()
-            y = y.to(device, non_blocking=True).float()
+        for _ in range(args.grad_accum_steps):
+            for modality in modality_order:
+                x, y, _ = next(loaders[modality])
+                x = x.to(device, non_blocking=True).float()
+                y = y.to(device, non_blocking=True).float()
 
-            DeterministicHMoE.CURRENT_TASK = modality
-            pred, _ = model(x)
-            loss = charbonnier_loss(pred, y) / max(1, len(modality_order))
-            loss.backward()
-            step_loss += float(loss.item())
+                DeterministicHMoE.CURRENT_TASK = modality
+                with torch.cuda.amp.autocast(enabled=args.amp and device == "cuda"):
+                    pred, _ = model(x)
+                    loss = charbonnier_loss(pred, y)
+                    loss = loss / max(1, len(modality_order) * args.grad_accum_steps)
+                scaler.scale(loss).backward()
+                step_loss += float(loss.item())
 
         if args.grad_clip > 0:
+            scaler.unscale_(optimizer)
             torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
-        optimizer.step()
+        scaler.step(optimizer)
+        scaler.update()
         scheduler.step()
 
         if step == 1 or step % args.log_every == 0:
@@ -147,16 +153,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--target_dir", type=str, default="gt")
     parser.add_argument("--modalities", nargs="+", default=["MRI", "CT", "PET"])
     parser.add_argument("--steps", type=int, default=120000)
-    parser.add_argument("--batch_size", type=int, default=1)
+    parser.add_argument("--batch_size", type=int, default=4, help="Per-modality micro-batch size.")
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--lr", type=float, default=2e-4)
-    parser.add_argument("--min_lr", type=float, default=1e-6)
+    parser.add_argument("--min_lr", type=float, default=1e-7)
     parser.add_argument("--weight_decay", type=float, default=1e-4)
+    parser.add_argument("--grad_accum_steps", type=int, default=2)
     parser.add_argument("--grad_clip", type=float, default=1.0)
     parser.add_argument("--save_every", type=int, default=10000)
     parser.add_argument("--log_every", type=int, default=100)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--resume_model", type=str, default=None, help="Optional model state_dict checkpoint.")
+    parser.add_argument("--amp", action="store_true", help="Use CUDA automatic mixed precision.")
     parser.add_argument("--cpu", action="store_true")
     return parser.parse_args()
 

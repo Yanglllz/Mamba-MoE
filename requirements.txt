@@ -3,6 +3,7 @@ numpy
 tqdm
 scikit-image
 scipy
+pyyaml
 einops
 mamba-ssm
 causal-conv1d

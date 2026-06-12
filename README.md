@@ -72,6 +72,16 @@ The model uses the project-compatible VSSBlock implementation provided in `mamba
 
 `mamba-ssm` and `causal-conv1d` usually require a CUDA/PyTorch build that matches the local GPU environment. CPU-only environments are suitable for source inspection and data-loader checks, but Mamba-backed inference requires these packages to be installed successfully.
 
+## Command Index
+
+| Purpose | Command |
+| --- | --- |
+| Minimal inference check | `python scripts/run_minimal_inference.py --task MRI --height 128 --width 128` |
+| Main 120k-style training | `python paper_code/train_main_120k.py --data_root /path/to/data --output_dir runs/mamba_moe_120k --steps 120000 --batch_size 4 --grad_accum_steps 2 --amp` |
+| Strict checkpoint evaluation | `python paper_code/evaluate_strict.py --checkpoint /path/to/checkpoint.pth --data_root /path/to/data --save_dir evaluation/final_120k` |
+| Saved-prediction PSNR/SSIM summary | `python scripts/evaluate.py --pred_dir /path/to/pred --gt_dir /path/to/gt` |
+| Export predictions | `python scripts/export_predictions.py --checkpoint /path/to/checkpoint.pth --input_dir /path/to/MRI/input --output_dir /path/to/predictions/MRI --task MRI` |
+
 ## Minimal Usage
 
 ```python
@@ -99,7 +109,7 @@ python scripts/run_minimal_inference.py --task MRI --height 128 --width 128
 
 This work uses the public All-in-One medical image restoration benchmark released with AMIR. Please see [`dataset/README.md`](dataset/README.md) for dataset links, access notes, and local directory examples.
 
-For lightweight local experiments, the included `PairedRestorationDataset` expects paired degraded/reference files under this layout:
+For local experiments, the included `PairedRestorationDataset` expects paired degraded/reference files under this layout:
 
 ```text
 data/
@@ -139,12 +149,14 @@ python paper_code/train_main_120k.py \
   --data_root /path/to/data \
   --output_dir runs/mamba_moe_120k \
   --steps 120000 \
-  --batch_size 1
+  --batch_size 4 \
+  --grad_accum_steps 2 \
+  --amp
 ```
 
-For quick installation or wiring checks, `scripts/train.py` remains available and can run either on a placeholder random dataset or on paired local restoration files.
+For quick installation or wiring checks, `scripts/train.py` remains available and can run either on synthetic random data or on paired local restoration files.
 
-Placeholder wiring check:
+Quick wiring check:
 
 ```bash
 python scripts/train.py --steps 10 --batch_size 1
@@ -193,7 +205,15 @@ The strict public evaluator summarizes PSNR and SSIM and exports per-slice and s
 
 ## Checkpoints
 
-Pretrained checkpoints will be released upon publication.
+Pretrained checkpoints are not stored in Git. They will be distributed as release artifacts when available.
+
+| Artifact | Git status | Notes |
+| --- | --- | --- |
+| 120,000-step manuscript checkpoint | not committed | release artifact, with SHA-256 hash |
+| Saved predictions | not committed | large benchmark outputs |
+| Case-level CSV files | not committed | evidence package artifact |
+| Bootstrap CI outputs | not committed | evidence package artifact |
+| Figure/table generation scripts | not committed | evidence package artifact |
 
 ## Citation
 
